@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>03-Vue</title>
+</head>
+<body>
+<div id="app">
+    <p>{{counter}}</p>
+</div>
+
+<script src="./kvue.js"></script>
+<script>
+    const app = new Kvue({
+        el: '#app',
+        data: {
+            counter: 1
+        },
+    });
+    setInterval(() => {
+        app.counter++;
+    }, 1000);
+</script>
+</body>
+</html>

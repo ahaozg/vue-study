@@ -1,8 +1,12 @@
 function defineReactive(obj, key, val) {
   observe(val);
+  // 创建一个dep实例
+  const dep = new Dep();
   Object.defineProperty(obj, key, {
     get() {
       console.log('get', key);
+      // 依赖收集
+      Dep.target && dep.addDep(Dep.target);
       return val;
     },
     set(v) {
@@ -10,7 +14,8 @@ function defineReactive(obj, key, val) {
         val = v;
         observe(v);
         console.log('set', key, val);
-        // update(val);
+        // update();
+        dep.notify();
       }
     },
 
@@ -66,26 +71,105 @@ class Compile {
     el.childNodes.forEach(node => {
       if (node.nodeType === 1) {
         // 元素
-        console.log('element', node.nodeName);
+        // console.log('element', node.nodeName);
+        this.compileElement(node);
         // 继续递归
         if (node.childNodes.length > 0) {
           this.compile(node);
         }
       } else if (this.isInter(node)) {
         // 插值文本
-        console.log('text', node.textContent);
+        // console.log('text', node.textContent);
         this.compileText(node);
       }
     })
   }
 
+  update(node, exp, dir) {
+    // 初始化
+    const fn = this[`${dir}Update`];
+    fn && fn(node, this.$vm[exp]);
+    // 更新
+    new Watcher(this.$vm, exp, function (val) {
+      fn && fn(node, val);
+    })
+  }
+
   // 处理插值文本
   compileText(node) {
-    node.textContent = this.$vm[RegExp.$1];
+    this.update(node, RegExp.$1, 'text');
+  }
+
+  textUpdate(node, val) {
+    node.textContent = val;
+  }
+
+  // 编译element
+  compileElement(node) {
+    // 1.获取当前元素的所有属性，并判断他们是不是动态属性
+    const nodeAttr = node.attributes;
+    Array.from(nodeAttr).forEach(attr => {
+      const attrName = attr.name;
+      const exp = attr.value;
+      // 判断attrName是否所指令或者事件
+      if (attrName.startsWith('k-')) {
+        // 指令
+        // 截取k-后面的部分，特殊处理
+        const dir = attrName.substring(2);
+        // 判断是否存在指令处理函数，若存在，则调用
+        this[dir] && this[dir](node, exp);
+      }
+    })
+  }
+
+  // k-text
+  text(node, exp) {
+    this.update(node, exp, 'text');
+  }
+
+  // k-html
+  html(node, exp) {
+    this.update(node, exp, 'html');
+  }
+
+  htmlUpdate(node, val) {
+    node.innerHTML = val;
   }
 
   // {{xxxx}}
   isInter(node) {
     return node.nodeType === 3 && /\{\{(.*)\}\}/.test(node.textContent);
+  }
+}
+
+// 负责具体更新任务的watcher
+class Watcher {
+  constructor(vm, key, updateFn) {
+    this.$vm = vm;
+    this.key = key;
+    this.updateFn = updateFn;
+    // 触发依赖收集
+    Dep.target = this;
+    vm[key];
+    Dep.target = null;
+  }
+
+  update() {
+    this.updateFn.call(this.$vm, this.$vm[this.key]);
+  }
+}
+
+// 和data中响应式的key之间是一一对应关系
+class Dep {
+  constructor() {
+    this.deps = [];
+  }
+
+  addDep(dep) {
+    this.deps.push(dep);
+  }
+
+  notify() {
+    this.deps.forEach(dep => dep.update());
   }
 }

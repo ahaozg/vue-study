@@ -100,10 +100,6 @@ class Compile {
     this.update(node, RegExp.$1, 'text');
   }
 
-  textUpdate(node, val) {
-    node.textContent = val;
-  }
-
   // 编译element
   compileElement(node) {
     // 1.获取当前元素的所有属性，并判断他们是不是动态属性
@@ -111,7 +107,7 @@ class Compile {
     Array.from(nodeAttr).forEach(attr => {
       const attrName = attr.name;
       const exp = attr.value;
-      // 判断attrName是否所指令或者事件
+      // 判断attrName是否有指令
       if (attrName.startsWith('k-')) {
         // 指令
         // 截取k-后面的部分，特殊处理
@@ -119,12 +115,23 @@ class Compile {
         // 判断是否存在指令处理函数，若存在，则调用
         this[dir] && this[dir](node, exp);
       }
+      // 判断attrName是否有事件
+      if (attrName.startsWith('@')) {
+        // @click="onclick"
+        const dir = attrName.substring(1);
+        // 事件监听
+        this.eventHandler(node, exp, dir);
+      }
     })
   }
 
   // k-text
   text(node, exp) {
     this.update(node, exp, 'text');
+  }
+
+  textUpdate(node, val) {
+    node.textContent = val;
   }
 
   // k-html
@@ -136,9 +143,28 @@ class Compile {
     node.innerHTML = val;
   }
 
+  // k-model
+  model(node, exp) {
+    // update方法只完成赋值和更新
+    this.update(node, exp, 'model');
+    // 事件监听
+    node.addEventListener('input', e => {
+      this.$vm[exp] = e.target.value;
+    })
+  }
+
+  modelUpdate(node, val) {
+    node.value = val;
+  }
+
   // {{xxxx}}
   isInter(node) {
     return node.nodeType === 3 && /\{\{(.*)\}\}/.test(node.textContent);
+  }
+
+  eventHandler(node, exp, dir) {
+    const fn = this.$vm.$options.methods && this.$vm.$options.methods[exp];
+    node.addEventListener(dir, fn.bind(this.$vm));
   }
 }
 

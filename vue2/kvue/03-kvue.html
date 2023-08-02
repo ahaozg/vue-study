@@ -6,9 +6,10 @@
 </head>
 <body>
 <div id="app">
-    <p>{{counter}}</p>
+    <p @click="add">{{counter2}}</p>
     <p k-text="counter"></p>
     <p k-html="desc"></p>
+    <input type="text" k-model="desc">
 </div>
 
 <script src="./kvue.js"></script>
@@ -17,8 +18,14 @@
     el: '#app',
     data: {
       counter: 1,
+      counter2: 1,
       desc: '<p>嘿嘿<span style="color:red;">哈哈</span></p>'
     },
+    methods: {
+      add() {
+        this.counter2++;
+      }
+    }
   });
   setInterval(() => {
     app.counter++;

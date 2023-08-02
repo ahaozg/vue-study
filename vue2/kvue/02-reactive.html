@@ -6,56 +6,54 @@
 </head>
 <body>
 <div id="app"></div>
+<script src="./reactive.js"></script>
+<!--<script>-->
+<!--    const app = document.querySelector('#app');-->
 
-<script>
-    const app = document.querySelector('#app');
+<!--    function defineReactive(obj, key, val) {-->
+<!--        observe(val);-->
+<!--        Object.defineProperty(obj, key, {-->
+<!--            get() {-->
+<!--                console.log('get', key);-->
+<!--                return val;-->
+<!--            },-->
+<!--            set(v) {-->
+<!--                if (v !== val) {-->
+<!--                    val = v;-->
+<!--                    console.log('set', key, val);-->
+<!--                    update(val);-->
+<!--                }-->
+<!--            },-->
 
-    function defineReactive(obj, key, val) {
-        observe(val);
-        Object.defineProperty(obj, key, {
-            get() {
-                console.log('get', key);
-                return val;
-            },
-            set(v) {
-                if (v !== val) {
-                    val = v;
-                    console.log('set', key, val);
-                    update(val);
-                }
-            },
+<!--        })-->
+<!--    }-->
 
-        })
-    }
+<!--    function observe(obj) {-->
+<!--        if (typeof obj !== 'object' || obj === null) {-->
+<!--            return obj;-->
+<!--        }-->
+<!--        Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]));-->
+<!--    }-->
 
-    function observe(obj) {
-        if (typeof obj !== 'object' || obj === null) {
-            return obj;
-        }
-        Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]));
-    }
+<!--    const obj = {-->
+<!--        foo: 'foo',-->
+<!--        bar: 'bar',-->
+<!--        baz: {-->
+<!--            a: 1-->
+<!--        }-->
+<!--    };-->
+<!--    // 对obj进行响应式处理-->
+<!--    observe(obj);-->
+<!--    // defineReactive(obj, 'foo', ' foooooo');-->
 
-    const obj = {
-        foo: 'foo',
-        bar: 'bar',
-        baz: {
-            a: 1
-        }
-    };
-    // 对obj进行响应式处理
-    observe(obj);
-    // defineReactive(obj, 'foo', ' foooooo');
+<!--    // 全量更新-->
+<!--    function update(val) {-->
+<!--        app.innerHTML = val;-->
+<!--    }-->
 
-    // 全量更新
-    function update(val) {
-        app.innerHTML = val;
-    }
-
-    setInterval(() => {
-        obj.foo = new Date().toLocaleTimeString();
-    }, 1000);
-
-    obj.
-</script>
+<!--    setInterval(() => {-->
+<!--        obj.foo = new Date().toLocaleTimeString();-->
+<!--    }, 1000);-->
+<!--</script>-->
 </body>
 </html>

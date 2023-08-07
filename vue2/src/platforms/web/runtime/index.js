@@ -31,9 +31,11 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// 安装了一个平台特有patch函数，简单讲作用是讲vdom转换为dom
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+// 实现挂载方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

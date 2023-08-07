@@ -13,6 +13,8 @@ export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // comp.$emit('come-event');
+  // comp.$on('come-event', cb);  cb在父组件中，此时是将父组件中的回调函数添加到子组件中
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)

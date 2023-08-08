@@ -129,8 +129,10 @@ export default class Watcher {
   addDep (dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
+      // watcher保存与它有关的dep, 主要是用来将来解除关系 unwatch
       this.newDepIds.add(id)
       this.newDeps.push(dep)
+      // 反过来
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }

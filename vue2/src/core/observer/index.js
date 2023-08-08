@@ -41,10 +41,16 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    // 创建了一个dep实例
+    // 做什么？
+    // 负责对象变更通知：新增属性或删除属性，数组7个操作
+    // eg: this.$set(this.obj, 'bar', '111');
+    // key -> dep
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 覆盖数组实例的原型
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -86,6 +92,7 @@ export class Observer {
  */
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
+  // 替换原型
   target.__proto__ = src
   /* eslint-enable no-proto */
 }
@@ -111,7 +118,11 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
     return
   }
+  // 目标是获取一个Observer实例
+  // 用于做对象响应式，对象包括纯对象和数组
   let ob: Observer | void
+  // 如果已经是响应式对象，则无需继续创建ob实例
+  // __ob__的值就是这个实例
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -121,6 +132,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 初始化时创建一个ob
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -139,6 +151,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 和当前key一一对应
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -153,16 +166,26 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // 递归遍历
+  // 每一个对象就有一个ob实例与之对应
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+      // 依赖收集
       if (Dep.target) {
+        // 和当前组件对应的watcher建立联系
         dep.depend()
         if (childOb) {
+          // 子ob也要与当前组件watcher建立联系
+          // 一个组件就是一个watcher
+          // dep n 1 watcher  renderWatcher组件watcher
+          // dep 1 n watcher  userWatcher this.$watch
+          // dep n n watcher  最终n对n
           childOb.dep.depend()
+          // 如果是数组，内部所有项都要响应式处理
           if (Array.isArray(value)) {
             dependArray(value)
           }

@@ -39,6 +39,8 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
+// 根据当前执行平台支持性，选择某种异步方案
+// 首先 微任务 promise.then
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
@@ -54,6 +56,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 } else if (!isIE && typeof MutationObserver !== 'undefined' && (
   isNative(MutationObserver) ||
   // PhantomJS and iOS 7.x
+    // 次选 微任务 mutationObserver
   MutationObserver.toString() === '[object MutationObserverConstructor]'
 )) {
   // Use MutationObserver where native Promise is not available,
@@ -71,6 +74,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
   isUsingMicroTask = true
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+  // 次次选 宏任务
   // Fallback to setImmediate.
   // Technically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
@@ -78,14 +82,18 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     setImmediate(flushCallbacks)
   }
 } else {
+  // 次次次选 宏任务
   // Fallback to setTimeout.
   timerFunc = () => {
     setTimeout(flushCallbacks, 0)
   }
 }
 
+// 平时开发使用的nextTick
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
+  // 传入的cb被封装为一个高阶函数，目的是处理错误
+  // 放入callbacks数组
   callbacks.push(() => {
     if (cb) {
       try {
@@ -98,6 +106,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
     }
   })
   if (!pending) {
+    // 第一次进来的时候启动异步任务
     pending = true
     timerFunc()
   }

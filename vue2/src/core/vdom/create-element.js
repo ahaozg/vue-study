@@ -92,6 +92,8 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+
+  // 核心逻辑
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
@@ -109,6 +111,7 @@ export function _createElement (
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // 获取自定义组件的构造函数  Ctor
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {

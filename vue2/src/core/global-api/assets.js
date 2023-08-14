@@ -21,11 +21,15 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
+          // _base 为 vue.extend(def)  => VueComponent => new VueComponent
+          // 获取组件构造函数
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && typeof definition === 'function') {
           definition = { bind: definition, update: definition }
         }
+        // 全局注册组件：options.components.comp = Ctor
+        // 未来组件初始化时会做选项合并
         this.options[type + 's'][id] = definition
         return definition
       }

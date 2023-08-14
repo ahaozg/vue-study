@@ -40,10 +40,17 @@ const componentVNodeHooks = {
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
+      // 缓存组件，被包含在keep-alive标签中的组件
+      // 不需要在初始化了
       // kept-alive components, treat as a patch
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // parent children
+      // 创建过程自上而下
+      // 挂载过程自下而上
+      // 销毁过程自下而上
+      // 正常初始化
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -98,6 +105,7 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 生成自定义组件的VNode
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -126,6 +134,7 @@ export function createComponent (
   }
 
   // async component
+  // 异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -144,6 +153,7 @@ export function createComponent (
     }
   }
 
+  // 组件数据处理：属性 事件 指令等
   data = data || {}
 
   // resolve constructor options in case global mixins are applied after
@@ -183,6 +193,7 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 安装组件管理钩子
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -222,9 +233,11 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // 实例化
   return new vnode.componentOptions.Ctor(options)
 }
 
+// 安装组件初始化或者更新或者销毁钩子函数
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {

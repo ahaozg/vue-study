@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>kvue2</title>
+</head>
+<body>
+<div id="app">
+  <h1>{{counter}}</h1>
+</div>
+<script src="./kvue2.js"></script>
+<script>
+  const app = new Kvue({
+    el: '#app',
+    data: {
+      counter: 1
+    },
+    render(h) {
+      // 真实dom 全量更新
+      // const h1 = document.createElement('h1');
+      // h1.innerText = this.counter + '';
+      // return h1;
+
+      // vnode方案
+      // return h('h1', {}, this.counter + '');
+      return h('h1', {}, [
+        h('p', {}, this.counter + ''),
+        h('p', {}, this.counter * 2 + ''),
+        h('p', {}, this.counter * 3 + ''),
+      ]);
+    }
+  })
+  setInterval(() => {
+    app.counter++;
+  }, 1000);
+</script>
+</body>
+</html>

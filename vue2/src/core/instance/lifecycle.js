@@ -190,6 +190,8 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // vm._render() -> 获取vnode
+      // vm._update -> vnode 转 dom
       vm._update(vm._render(), hydrating)
     }
   }

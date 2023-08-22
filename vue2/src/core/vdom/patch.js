@@ -444,22 +444,31 @@ export function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         // 后面四个是四种假设
       } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        // 老开始和新开始相同，打补丁，游标同时向后移动
         patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
         oldStartVnode = oldCh[++oldStartIdx]
         newStartVnode = newCh[++newStartIdx]
       } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        // 老结束和新结束相同，打补丁，游标向前移动
         patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
         oldEndVnode = oldCh[--oldEndIdx]
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        // 老开始和新结束相同，打补丁，游标移动
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
+        // 移动到老的队伍前面
         canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
+        // 老开始向后
         oldStartVnode = oldCh[++oldStartIdx]
+        // 新结束向前
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+        // 老结束和新开始相同，打补丁，游标移动
         patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
         canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
+        // 老结束向前
         oldEndVnode = oldCh[--oldEndIdx]
+        // 新开始向后
         newStartVnode = newCh[++newStartIdx]
       } else {
         // 首尾没有找到相同，老老实实查找
@@ -469,7 +478,7 @@ export function createPatchFunction (backend) {
           ? oldKeyToIdx[newStartVnode.key]
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
         if (isUndef(idxInOld)) { // New element
-          // 不存在就穿件
+          // 不存在就创建
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
         } else {
           // 存在

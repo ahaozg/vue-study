@@ -29,6 +29,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+  // 扩展config，错误修改时可以给提示
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.

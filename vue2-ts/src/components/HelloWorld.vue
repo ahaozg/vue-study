@@ -51,8 +51,10 @@ export default class HelloWorld extends Vue {
   features: FeatureSelect[] = [];
 
   async created() {
-    this.features = (await getResult<FeatureSelect[]>()).data;
-    Axios.get('/api/list')
+    // this.features = (await getResult<FeatureSelect[]>()).data;
+    Axios.get<FeatureSelect[]>('/api/list').then(res => {
+      this.features = res.data;
+    })
   }
 
   addFeature(e: KeyboardEvent) {

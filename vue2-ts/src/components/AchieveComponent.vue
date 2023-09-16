@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="AchieveComponent">
     <h1>{{ msg }}</h1>
     <p>
       <input type="text" @keydown.enter="addFeature">
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Emit, Watch} from 'vue-property-decorator';
+import {Prop, Vue, Emit, Watch} from 'vue-property-decorator';
 import Axios from 'axios';
 
 // 类型别名
@@ -28,25 +28,49 @@ type Feature = {
 // 交叉类型
 export type FeatureSelect = Feature & {selected: boolean}
 
-interface Result<T> {
-  ok: number;
-  data: T;
-}
-
-// 泛型方法
-function getResult<T>(): Promise<Result<T>> {
-  const data: any = [
-    {id: 1, name: '类型注解', selected: false},
-    {id: 2, name: '编译形语言', selected: true},
-  ]
-  return Promise.resolve({
-    ok: 0 | 1,
-    data
+function Component(target: any): any {
+  const options: any = {};
+  const proto = target.prototype;
+  const keys = Object.getOwnPropertyNames(proto);
+  keys.forEach(key => {
+    if (key !== 'constructor') {
+      const desc = Object.getOwnPropertyDescriptor(proto, key);
+      if (desc) {
+        if (typeof desc.value === 'function') {
+          const lifeCycle = ['beforeCreated', 'created', 'beforeMounted', 'mounted'];
+          if (lifeCycle.includes(key)) {
+            options[key] = proto[key];
+            // options[key] = desc.value;
+          } else {
+            const methods = options.methods = options.methods || {};
+            methods[key] = desc.value;
+          }
+        } else if (desc.get || desc.set) {
+          const computed = options.computed = options.computed || {};
+          computed[key] = {
+            get: desc.get,
+            set: desc.set,
+          }
+        }
+      }
+    }
   });
+  options.data = function () {
+    const data: any = {};
+    const vm = new target();
+    Object.keys(vm)
+        .filter(key => !key.startsWith('_') && !key.startsWith('$'))
+        .forEach(key => {
+          data[key] = vm[key];
+        })
+    return data;
+  }
+
+  return Vue.extend(options);
 }
 
 @Component
-export default class HelloWorld extends Vue {
+export default class AchieveComponent extends Vue {
   @Prop({type: String, required: true})
   private msg!: string;
 
@@ -67,7 +91,7 @@ export default class HelloWorld extends Vue {
       name: input.value,
       selected: false
     }
-      this.features.push(feature);
+    this.features.push(feature);
     input.value = '';
     return feature;
   }

@@ -137,7 +137,7 @@ function rec(target: any, name: string, descriptor: any) {
     baz.call(this, val);
   }
 }
-@Log(window.alert)
+@Log(console.log)
 class Foo {
   bar = "bar";
 

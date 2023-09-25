@@ -26,7 +26,7 @@ server.get('*', (req, res) => {
   // 用渲染器渲染vue实例
   const context = {url: req.url};
   renderer.renderToString(context).then(html => {
-    console.log('html =>', html);
+    // console.log('html =>', html);
     res.send(html);
   }).catch(err => {
     console.log('err =>', err);
